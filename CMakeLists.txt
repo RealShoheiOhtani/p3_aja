@@ -3,4 +3,5 @@ project(p3)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(p3_aja main.cpp)
+add_executable(p3_aja main.cpp
+        BPlusTree.cpp)
