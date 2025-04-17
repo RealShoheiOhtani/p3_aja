@@ -5,9 +5,11 @@
 #include <string>
 
 // change input cols here
-const std::vector<int> COLUMNS_TO_KEEP = {1, 2, 3};
+const std::vector<int> COLUMNS_TO_KEEP = {0, 2, 5};
+// desired format:[id, name, year,rating]
+std::vector<std::vector<std::string>> readTSV(const std::string& filename,const
+    std::string ratingsFile, int maxRows = 10000) {
 
-std::vector<std::vector<std::string>> readTSV(const std::string& filename, int maxRows = 10000) {
     std::ifstream file(filename);
     std::vector<std::vector<std::string>> data;
     std::string line;
@@ -18,6 +20,7 @@ std::vector<std::vector<std::string>> readTSV(const std::string& filename, int m
     }
 
     int rowCount = 0;
+    std::getline(file, line); //just to remove first row
     while (std::getline(file, line)) {
         std::istringstream ss(line);
         std::string token;
@@ -29,7 +32,7 @@ std::vector<std::vector<std::string>> readTSV(const std::string& filename, int m
             allColumns.push_back(token);
         }
 
-        // Keep only columns in vec
+        // Keep only columns you need
         for (int index : COLUMNS_TO_KEEP) {
             if (index < allColumns.size())
                 row.push_back(allColumns[index]);
@@ -40,12 +43,43 @@ std::vector<std::vector<std::string>> readTSV(const std::string& filename, int m
 
         if (maxRows > 0 && rowCount >= maxRows) break;
     }
+    file.close();
+
+
+    std::ifstream rFile(ratingsFile);
+    if (!rFile.is_open()) {
+        std::cerr << "Error: Could not open file " << ratingsFile << "\n";
+    }
+    //ratings are index 1
+    rowCount = 0;
+    std::getline(rFile, line); //remove filler line
+    while (std::getline(rFile, line)) {
+        std::istringstream ss(line);
+        std::string token;
+        std::vector<std::string> row;
+        std::vector<std::string> allColumns;
+
+        // tab separated
+        for (int i=0;i<3;i++) {
+            std::getline(ss, token, '\t');
+            //we are adding the rating to the last index of the vector
+            if(i==1)
+                data[rowCount].push_back(token);
+        }
+        rowCount++;
+        if (maxRows > 0 && rowCount >= maxRows) break;
+
+
+    }
+
 
     return data;
 }
 int main() {
-    std::string filename = "name.basics.tsv";
-    auto data = readTSV(filename);
+    std::string filename = "/Users/Owner/Downloads/IMDb Title Basics.tsv";
+    std::string ratingsFile = "/Users/Owner/Downloads/IMDb Ratings Data.tsv";
+
+    auto data = readTSV(filename, ratingsFile);
 
     // Print first entries
     for (const auto& row : data) {
