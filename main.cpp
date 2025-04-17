@@ -7,8 +7,7 @@
 // change input cols here
 const std::vector<int> COLUMNS_TO_KEEP = {0, 2, 5};
 // desired format:[id, name, year,rating]
-std::vector<std::vector<std::string>> readTSV(const std::string& filename,const
-    std::string ratingsFile, int maxRows = 10000) {
+std::vector<std::vector<std::string>> readTSV(const std::string& filename,const std::string ratingsFile, int maxRows = 10000) {
 
     std::ifstream file(filename);
     std::vector<std::vector<std::string>> data;
@@ -68,7 +67,6 @@ std::vector<std::vector<std::string>> readTSV(const std::string& filename,const
         }
         rowCount++;
         if (maxRows > 0 && rowCount >= maxRows) break;
-
 
     }
 
