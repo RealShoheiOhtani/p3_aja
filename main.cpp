@@ -1,13 +1,15 @@
 #include <iostream>
-#include <sstream>>
+#include "MaxHeap.h"
+#include "BPlusTree.cpp"
+#include <sstream>
 #include <fstream>
 #include <vector>
 #include <string>
 
 // change input cols here
-const std::vector<int> COLUMNS_TO_KEEP = {0, 2, 5};
+const std::vector<int> COLUMNS_TO_KEEP = {0, 1, 2, 5};
 // desired format:[id, name, year,rating]
-std::vector<std::vector<std::string>> readTSV(const std::string& filename,const std::string ratingsFile, int maxRows = 10000) {
+std::vector<std::vector<std::string>> readTSV(const std::string& filename,const std::string ratingsFile, int maxRows = 1000000) {
 
     std::ifstream file(filename);
     std::vector<std::vector<std::string>> data;
@@ -73,40 +75,34 @@ std::vector<std::vector<std::string>> readTSV(const std::string& filename,const 
 
     return data;
 }
+int main() {
+    std::cout<<"Input year to search"<<std::endl;
+    std::string inputYear;
+    std::cin>>inputYear;
+    MaxHeap maxHeap;
+    BPlusTree tree;
 
-int getValidInteger() {
-    int year;
-    while (true) {
-        std::cout << "Enter a year: ";
-        std::cin >> year;
+    std::string filename = "/Users/Aidan/Downloads/title-basics.txt";
+    std::string ratingsFile = "/Users/Aidan/Downloads/title-ratings.txt";
 
-        if (std::cin.fail()) {
-            std::cin.clear(); // clear the error flag
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // discard invalid input
-            std::cout << "Invalid input. Please enter a valid integer.\n";
-        } else {
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // clear any extra input
-            if (year < 1900 && year < 2025) {
-                return year;
-            }else {
-                std::cout << "Invalid input. Please enter a valid integer.\n";
-            }
+    auto data = readTSV(filename, ratingsFile);
+
+    //Make entries of input year into movie objects. insert into maxHeap.
+    for (const auto& row : data) {
+        if (row[3]==inputYear && row[1]== "movie") {
+            Movie *m = new Movie(row[0], row[2], std::stod(row[4]), std::stoi(row[3]));
+            maxHeap.insertPub(*m);
+            tree.insert(m);
+
         }
     }
-}
-int main() {
-    std::string filename = "/Users/Owner/Downloads/IMDb Title Basics.tsv";
-    std::string ratingsFile = "/Users/Owner/Downloads/IMDb Ratings Data.tsv";
-
-    auto data = readTSV(filename, ratingsFile,100000);
-
-    // Print first entries
-    for (const auto& row : data) {
-        for (const auto& col : row)
-            std::cout << col << " ";
-        std::cout << "\n";
+    std::cout<<"Top 10 Movies from Heap in " << inputYear << std::endl;
+    maxHeap.printTop5();
+    std::cout<<std::endl;
+    std::cout<<"Top 10 Movies from B Tree in " << inputYear << std::endl;
+    vector<Movie*> results = tree.query(stoi(inputYear));
+    for (auto* movie : results) {
+        cout << movie->TITLE << " (" << movie->RATING << ")" << endl;
     }
-    // int year=getValidInteger();
-
     return 0;
 }
