@@ -73,11 +73,32 @@ std::vector<std::vector<std::string>> readTSV(const std::string& filename,const 
 
     return data;
 }
+
+int getValidInteger() {
+    int year;
+    while (true) {
+        std::cout << "Enter a year: ";
+        std::cin >> year;
+
+        if (std::cin.fail()) {
+            std::cin.clear(); // clear the error flag
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // discard invalid input
+            std::cout << "Invalid input. Please enter a valid integer.\n";
+        } else {
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // clear any extra input
+            if (year < 1900 && year < 2025) {
+                return year;
+            }else {
+                std::cout << "Invalid input. Please enter a valid integer.\n";
+            }
+        }
+    }
+}
 int main() {
     std::string filename = "/Users/Owner/Downloads/IMDb Title Basics.tsv";
     std::string ratingsFile = "/Users/Owner/Downloads/IMDb Ratings Data.tsv";
 
-    auto data = readTSV(filename, ratingsFile);
+    auto data = readTSV(filename, ratingsFile,100000);
 
     // Print first entries
     for (const auto& row : data) {
@@ -85,6 +106,7 @@ int main() {
             std::cout << col << " ";
         std::cout << "\n";
     }
+    // int year=getValidInteger();
 
     return 0;
 }
