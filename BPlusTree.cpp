@@ -2,23 +2,10 @@
 #include <vector>
 #include <algorithm>
 #include <string>
+#include "Movie.h"
 using namespace std;
 
 const int DEGREE = 64;
-
-struct Movie {
-    int id;
-    string name;
-    int year;
-    double rating;
-
-    Movie(int i, const string& n, int y, double r) {
-        id = i;
-        name = n;
-        year = y;
-        rating = r;
-    }
-};
 
 struct node {
     bool isLeaf;
@@ -82,17 +69,17 @@ public:
     void insert(Movie* m) {
         node* curr = root;
         while (!curr->isLeaf) {
-            int i = upper_bound(curr->keys.begin(), curr->keys.end(), m->year) - curr->keys.begin();
+            int i = upper_bound(curr->keys.begin(), curr->keys.end(), m->YEAR) - curr->keys.begin();
             curr = curr->children[i];
         }
 
-        auto it = find(curr->keys.begin(), curr->keys.end(), m->year);
+        auto it = find(curr->keys.begin(), curr->keys.end(), m->YEAR);
         if (it != curr->keys.end()) {
             int idx = distance(curr->keys.begin(), it);
             curr->values[idx].push_back(m);
         } else {
-            int pos = upper_bound(curr->keys.begin(), curr->keys.end(), m->year) - curr->keys.begin();
-            curr->keys.insert(curr->keys.begin() + pos, m->year);
+            int pos = upper_bound(curr->keys.begin(), curr->keys.end(), m->YEAR) - curr->keys.begin();
+            curr->keys.insert(curr->keys.begin() + pos, m->YEAR);
             curr->values.insert(curr->values.begin() + pos, vector<Movie*>{m});
         }
 
@@ -131,7 +118,7 @@ public:
             if (curr->keys[i] == year) {
                 auto result = curr->values[i];
                 sort(result.begin(), result.end(), [](Movie* a, Movie* b) {
-                    return a->rating > b->rating;
+                    return a->RATING > b->RATING;
                 });
                 if (result.size() > 10) result.resize(10);
                 return result;
