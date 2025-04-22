@@ -13,7 +13,6 @@ public:
     Node* right;
     Node* parent;
 
-    Node() : movie("null","null",-1.0,-1),left(nullptr), right(nullptr), parent(nullptr) {} //default constructor
     Node(Movie m) : movie(m), left(nullptr), right(nullptr), parent(nullptr) {} //constructor with movie
     Node(Movie m, Node* p) : movie(m), left(nullptr), right(nullptr), parent(p) {}  //constructor with movie and parent
     void setMovie(Movie m) {    //set movie;
