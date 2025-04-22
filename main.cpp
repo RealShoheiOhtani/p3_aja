@@ -5,7 +5,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
-
+#include <chrono>
 // change input cols here
 const std::vector<int> COLUMNS_TO_KEEP = {0, 1, 2, 5}; // Selecting specific columns: id, type, title, year
 
@@ -100,19 +100,21 @@ int main() {
             tree.insert(m);        // Insert into B+ Tree (pointer)
         }
     }
-
+    auto sHeap= std::chrono::high_resolution_clock::now();
     // Print top 10 movies by rating using MaxHeap
     std::cout << "Top 10 Movies from Heap in " << inputYear << std::endl;
     maxHeap.printTop5();
-    std::cout << std::endl;
+    std::chrono::duration<double> diff = std::chrono::high_resolution_clock::now() - sHeap;
+    std::cout << "heap print time: " << diff.count() << "seconds" << std::endl;
 
+    auto sBtree = std::chrono::high_resolution_clock::now();
     // Print top 10 movies by rating using B+ Tree
     std::cout << "Top 10 Movies from B Tree in " << inputYear << std::endl;
     vector<Movie*> results = tree.query(stoi(inputYear));
     for (auto* movie : results) {
         cout << movie->TITLE << " (" << movie->RATING << ")" << endl;
     }
-
+    diff = std::chrono::high_resolution_clock::now() - sBtree;
+    std::cout << "B+ tree print time: " << diff.count() << "seconds" << std::endl;
     return 0;
 }
-``
