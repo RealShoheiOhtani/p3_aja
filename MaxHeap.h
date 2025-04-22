@@ -19,7 +19,7 @@ class MaxHeap {
         std::queue<Node*> q;    //create queue
         q.push(root);       //push root
 
-        while (!q.empty()) {    //until empty current node is at front
+        while (!q.empty()) {    //until empty, iterates through all nodes O(n)
             Node* curr = q.front();
             q.pop();
 
@@ -34,19 +34,20 @@ class MaxHeap {
                 return;
             }
 
-            q.push(curr->left); //push left and right if there exists
+            q.push(curr->left); //if neither were nullptr, push child nodes
             q.push(curr->right);
         }
     }
     void heapifyUp(Node* node) {    //while there is parent and parent is less than curr node, swap
+        //O(logn) as it only iterates through one path from leaf to root
         while (node->parent && node->movie.getRATING() > node->parent->movie.getRATING()) {
-            std::swap(node->movie, node->parent->movie);
+            swapNodes(node, node->parent);  //swap the parent with the node
             node = node->parent;    //move to parent to check its parent
         }
     }
-    Node* getLastNode(Node* root) { //similar to insert, goes left and right to find last spot
+    Node* getLastNode() { //similar to insert, goes left and right to find last spot
         if (root == nullptr) {
-            return nullptr;
+            return root;
         }
         std::queue<Node*> q;
         q.push(root);
@@ -63,109 +64,81 @@ class MaxHeap {
                 q.push(last->right);    //important because Heaps are always complete.
             }
         }
-        return last;//return last when its at the last node without chilren
-    }
-    void swapRoot(Node* node) { //creates temp movie object to swap root with a node.
-        Movie tempMovie = root->movie;
-        root->setMovie(node->movie);
-        node->setMovie(tempMovie);
+        return last;//return last when its at the last node without children
     }
 
-    void heapifyDown(Node* node) {  //for after popping the root.
+    void swapNodes(Node* node1, Node *node2) { //creates temp movie object to swap root with a node.
+        Movie tempMovie = node1->movie; //O(1) operation as it is simply accessing
+        node1->setMovie(node2->movie);
+        node2->setMovie(tempMovie);
+    }
+
+    void heapifyDown() {  //when root is swapped with last node and popped need to put new root in correct place
+        //O(logn) as it goes down one path from root to leaf and tree is always complete
+        Node *node=root;
         while (node) {
             Node* largest = node;
 
             if (node->left && node->left->movie.getRATING() > largest->movie.getRATING()) {
-                largest = node->left;
+                largest = node->left;   //if there is a left node and its rating is higher than largest, move largest to left
             }
             if (node->right && node->right->movie.getRATING() > largest->movie.getRATING()) {
-                largest = node->right;
-            }//find if left or right has the higher rating make that largest.
+                largest = node->right;   //if there is a right node and its rating is higher than largest, move largest to right
+            }
 
             if (largest == node) {
                 break;  //breaks if neither of the nodes was larger as thats how a maxHeap should be
             }
 
-            std::swap(node->movie, largest->movie); //swap movie with largest movie
-            node = largest; //move node to the larger one and check if thats in position by going back in loop
+            swapNodes(node, largest);   //swap movie with largest node (parent)
+            node = largest; //move node to the larger one and loop again
         }
     }
-    void popHead(Node* node) {
-        if (root == getLastNode(root)) {
+
+    void popHead() {//swaps root with last node, runs heapify down
+        //O(logn) + O(logn) = O(logn)
+        Node *lastNode = getLastNode();//o(logn)
+
+        if (root == lastNode) {
+            delete root;
             return;//if only 1 node
         }
-        swapRoot(node);//swap with node.
-        Node* temp = getLastNode(node);
-        if (getLastNode(node)==getLastNode(node)->parent->left) {
-            getLastNode(node)->parent->left=nullptr;
+
+        swapNodes(root, lastNode);  //swap root with last node
+
+        if (lastNode==lastNode->parent->left) {
+            lastNode->parent->left=nullptr;
         }
-        if (getLastNode(node)==getLastNode(node)->parent->right) {
-            getLastNode(node)->parent->right=nullptr;
-        }//set parents children to nullptr
-        delete temp;//deletes the node that was last
-        heapifyDown(root);//heapify down from the root that was swapped
+        if (lastNode==lastNode->parent->right) {
+            lastNode->parent->right=nullptr;
+        }//set parent's children to nullptr as lastNode is about to get deleted
+
+        delete lastNode;//deletes the node that was last
+        heapifyDown();//heapify down from the root that was swapped || O(logn)
     }
 
-    void printLevels(Node* node) {  //ensuring heap was working as normal, not used in code other than debug
-        if (!node) return;
-
-        std::queue<Node*> q;
-        q.push(node);
-
-        while (!q.empty()) {
-            int levelSize = q.size();
-
-            for (int i = 0; i < levelSize; i++) {
-                Node* node = q.front();
-                q.pop();
-
-                std::cout << node->movie.getRATING() << " ";
-
-                if (node->left) {
-                    q.push(node->left);
-                }
-                if (node->right) {
-                    q.push(node->right);
-                }
-            }
-            std::cout << std::endl;
-        }
-    }
-    void printTopFive() {
+    void printTop10() {   //prints the top 10
         if (root==nullptr) {//if empty print that there were no movies.
             std::cout<<"No movies from that year"<<std::endl;
             return;
         }   //prints top 10 by popping the head and heapify down 10 times.
         for (int i=0; i<10; i++) {
-            if (root == getLastNode(root) && i<9) {//if there were less than 10 movies, ensures it prints the correct amount
+            if (root == getLastNode() && i<9) {//if there were less than 10 movies, ensures it prints the correct amount
                 i=9;
             }
             std::cout << root->movie.getTITLE() << " ("<<root->movie.getRATING()<<") "<<std::endl;
-            popHead(getLastNode(root)); //print and pop root.
+            popHead(); //print and pop root.
         }
     }
 
-
     public:
-    MaxHeap() : root(NULL) {}       //default constructor, root is null
+    MaxHeap() : root(NULL) {}   //default constructor, root is null
 
-    void insertPub(Movie m) {     //insert into heap
+    void insertPub(Movie m) {   //insert into heap
         insert(m);
     }
-    void printLevels() {//print levels
-        printLevels(root);
-    }
-    void swapHeadLast() {//swap the head with last pos.
-        swapRoot(getLastNode(root));
-    }
-    void getLastNode() {//gets the last node
-        std::cout<<getLastNode(root)->movie.getRATING()<<std::endl;
-    }
-    void popHead() {//removes head
-        popHead(getLastNode(root));
-    }
     void printTop5() {  //print the top5
-        printTopFive();
+        printTop10();
     }
 };
 #endif //MAXHEAP_H
