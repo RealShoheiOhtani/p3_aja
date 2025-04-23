@@ -85,8 +85,8 @@ int main() {
     MaxHeap maxHeap; // MaxHeap to store movies by rating
     BPlusTree tree;  // B+ Tree to index movies by year
 
-    std::string filename = "/Users/Aidan/Downloads/title-basics.txt";
-    std::string ratingsFile = "/Users/Aidan/Downloads/title-ratings.txt";
+    std::string filename = "title-basics.txt";
+    std::string ratingsFile = "title-ratings.txt";
 
     auto data = readTSV(filename, ratingsFile); // Read and merge input files
 
