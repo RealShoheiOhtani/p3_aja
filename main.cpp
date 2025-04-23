@@ -91,23 +91,32 @@ int main() {
     auto data = readTSV(filename, ratingsFile); // Read and merge input files
 
     // Make entries of input year into movie objects. insert into maxHeap.
+    auto sHeap= std::chrono::high_resolution_clock::now();
     for (const auto& row : data) {
         // Filter by year and type (must be a movie)
         if (row[3] == inputYear && row[1] == "movie") {
             // Create a new Movie object from data row
             Movie* m = new Movie(row[0], row[2], std::stod(row[4]), std::stoi(row[3]));
             maxHeap.insertPub(*m); // Insert into maxHeap (copy)
-            tree.insert(m);        // Insert into B+ Tree (pointer)
+            //tree.insert(m);        // Insert into B+ Tree (pointer)
         }
     }
-    auto sHeap= std::chrono::high_resolution_clock::now();
     // Print top 10 movies by rating using MaxHeap
     std::cout << "Top 10 Movies from Heap in " << inputYear << std::endl;
     maxHeap.printTop5();
     std::chrono::duration<double> diff = std::chrono::high_resolution_clock::now() - sHeap;
-    std::cout << "heap print time: " << diff.count() << "seconds" << std::endl;
+    std::cout << "heap insert & print time: " << diff.count() << "seconds" << std::endl;
 
     auto sBtree = std::chrono::high_resolution_clock::now();
+    for (const auto& row : data) {
+        // Filter by year and type (must be a movie)
+        if (row[3] == inputYear && row[1] == "movie") {
+            // Create a new Movie object from data row
+            Movie* m = new Movie(row[0], row[2], std::stod(row[4]), std::stoi(row[3]));
+            //maxHeap.insertPub(*m); // Insert into maxHeap (copy)
+            tree.insert(m);        // Insert into B+ Tree (pointer)
+        }
+    }
     // Print top 10 movies by rating using B+ Tree
     std::cout << "Top 10 Movies from B Tree in " << inputYear << std::endl;
     vector<Movie*> results = tree.query(stoi(inputYear));
@@ -115,6 +124,6 @@ int main() {
         cout << movie->TITLE << " (" << movie->RATING << ")" << endl;
     }
     diff = std::chrono::high_resolution_clock::now() - sBtree;
-    std::cout << "B+ tree print time: " << diff.count() << "seconds" << std::endl;
+    std::cout << "B+ tree insert & print time: " << diff.count() << "seconds" << std::endl;
     return 0;
 }
